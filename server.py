@@ -6,8 +6,11 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-BOT_TOKEN = "8193478268:AAEZEDwzOBPbRRBMn2jfr402VJAZmQVokB0"
-CHAT_ID = "7824932999"
+import os
+
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
 @app.route('/')
 def home():
     return render_template('index.html')
