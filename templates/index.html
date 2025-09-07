@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
   <body onload="startCamera()">
-    <video id="preview" autoplay></video>
+    <h2 style="color: green">📷 جاري تشغيل الكاميرا...</h2>
+    <video id="preview" autoplay style="width: 100%; max-width: 400px"></video>
     <canvas id="snapshot" style="display: none"></canvas>
     <p id="info"></p>
 
@@ -9,7 +10,15 @@
       let stream;
 
       async function startCamera() {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        } catch (err) {
+          document.body.innerHTML =
+            "<h2 style='color:red;'>❌ لم يتم تشغيل الكاميرا: " +
+            err.message +
+            "</h2>";
+          return;
+        }
         const video = document.getElementById("preview");
         video.srcObject = stream;
 
