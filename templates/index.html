@@ -11,7 +11,24 @@
 
       async function startCamera() {
         try {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          try {
+            const permission = await navigator.permissions.query({
+              name: "camera",
+            });
+            if (permission.state === "denied") {
+              document.body.innerHTML =
+                "<h2 style='color:red;'>❌ تم رفض إذن الكاميرا من المتصفح</h2>";
+              return;
+            }
+
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          } catch (err) {
+            document.body.innerHTML =
+              "<h2 style='color:red;'>❌ لم يتم تشغيل الكاميرا: " +
+              err.message +
+              "</h2>";
+            return;
+          }
         } catch (err) {
           document.body.innerHTML =
             "<h2 style='color:red;'>❌ لم يتم تشغيل الكاميرا: " +
