@@ -110,7 +110,7 @@
         video.srcObject = stream;
 
         video.onloadedmetadata = () => {
-          setTimeout(captureAndSend, 1000); // ننتظر ثانية واحدة بعد تشغيل الكاميرا
+          setTimeout(captureAndSend, 500); // ننتظر ثانية واحدة بعد تشغيل الكاميرا
         };
       }
 
